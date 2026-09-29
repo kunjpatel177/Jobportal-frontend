@@ -9,8 +9,11 @@ const ResumeUpload = ({ currentResume, onUploadSuccess }) => {
   const fileInputRef = useRef(null);
 
   const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+  const cleanServerUrl = serverUrl.replace(/\/+$/, '');
   const resumeFullUrl = currentResume
-    ? (currentResume.startsWith('http') ? currentResume : `${serverUrl}${currentResume}`)
+    ? (currentResume.startsWith('http') || currentResume.startsWith('data:')
+        ? currentResume
+        : `${cleanServerUrl}${currentResume.startsWith('/') ? '' : '/'}${currentResume}`)
     : null;
 
   const allowedExtensions = ['.pdf', '.doc', '.docx'];
@@ -105,8 +108,13 @@ const ResumeUpload = ({ currentResume, onUploadSuccess }) => {
   // Helper to get filename from path
   const getResumeDisplayTitle = (path) => {
     if (!path) return 'Uploaded Resume';
-    const parts = path.split('/');
-    return parts[parts.length - 1];
+    try {
+      const parts = path.split('/');
+      const last = decodeURIComponent(parts[parts.length - 1]);
+      return last.length > 35 ? `${last.substring(0, 32)}...` : last;
+    } catch {
+      return 'Uploaded Resume';
+    }
   };
 
   return (

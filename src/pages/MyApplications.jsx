@@ -276,8 +276,11 @@ const MyApplications = () => {
                   })
                 : '';
 
+              const cleanServerUrl = (serverUrl || 'http://localhost:5000').replace(/\/+$/, '');
               const resumeUrl = app.resume
-                ? (app.resume.startsWith('http') ? app.resume : `${serverUrl}${app.resume}`)
+                ? (app.resume.startsWith('http') || app.resume.startsWith('data:')
+                    ? app.resume
+                    : `${cleanServerUrl}${app.resume.startsWith('/') ? '' : '/'}${app.resume}`)
                 : null;
 
               const companyInitial = app.job?.company ? app.job.company.charAt(0).toUpperCase() : 'J';
